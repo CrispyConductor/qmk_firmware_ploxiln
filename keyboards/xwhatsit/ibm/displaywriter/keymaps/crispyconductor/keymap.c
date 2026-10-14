@@ -3,6 +3,7 @@
 // Defines names for use in layer keycodes and the keymap
 enum layer_names {
     _BASE,
+    _FUNCBANK,
     _HIST,
     _HISTCODE,
     _FN,
@@ -58,6 +59,7 @@ const uint32_t PROGMEM unicode_map[] = {
  * - Lower-right key block is remapped to a T arrow nav.  Remaining 4 keys
  *   are media controls; Play/Pause, Mute, VolUp, VolDown.
  * - Lower 8 keys in left-hand key block are mapped to F13-F20.
+ * - Upper-left key in left-hand key block momentarily activates historical layer.
  *
  * Fn layer (hold ENTER): Function keys and uncommon keys.
  * - Function keys are either Fn+Number (incl. dash and equals for F11, F12) or
@@ -67,6 +69,7 @@ const uint32_t PROGMEM unicode_map[] = {
  *   caps lock, scroll lock, pause.
  * - Fn+Space for Advanced Fn layer.
  * - Fn+H toggles historical key map layer.
+ * - Fn+F toggles function bank layer - left-hand keys are all F1-F10.
  *
  * Advanced Fn layer (hold ENTER+Space): Internal keyboard operations.
  * - 'E' resets EEPROM.
@@ -80,23 +83,32 @@ const uint32_t PROGMEM unicode_map[] = {
  * - Arrow keys behave as specified on the legends.
  * - 'CODE'+Left/Right becomes Home/End.
  * - 'CODE'+Up/Down becomes Ctrl+Home/Ctrl+End.
+ * - 'LOCK' becomes caps lock.  LCTL is assigned to upper-right key in left-hand block for convenience.
  */
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /* Base */
     [_BASE] = LAYOUT_all(
-        KC_TRNS, KC_ESC ,                                                                                                                                               KC_INS , KC_HOME, KC_PGUP, KC_PSCR,
+        MO(_HIST),KC_ESC,                                                                                                                                               KC_INS , KC_HOME, KC_PGUP, KC_PSCR,
         KC_F13 , KC_F14 ,   KC_GRV , KC_1   , KC_2   , KC_3   , KC_4   , KC_5   , KC_6   , KC_7   , KC_8   , KC_9   , KC_0   , KC_MINS, KC_EQL ,  KC_BSPC   , KC_ESC,   KC_DEL , KC_END , KC_PGDN, KC_APP,
         KC_F15 , KC_F16 ,   KC_TAB , KC_Q   , KC_W   , KC_E   , KC_R   , KC_T   , KC_Y   , KC_U   , KC_I   , KC_O   , KC_P   , KC_LBRC, KC_RBRC,    KC_ENT ,
         KC_F17 , KC_F18 ,   KC_LCTL, KC_A   , KC_S   , KC_D   , KC_F   , KC_G   , KC_H   , KC_J   , KC_K   , KC_L   , KC_SCLN, KC_QUOT, KC_BSLS,                        KC_MPLY, KC_UP  , KC_MUTE, KC_VOLU,
         KC_F19 , KC_F20 ,   KC_LSFT, KC_LGUI, KC_Z   , KC_X   , KC_C   , KC_V   , KC_B   , KC_N   , KC_M   , KC_COMM, KC_DOT , KC_SLSH,            KC_RSFT  ,           KC_LEFT, KC_DOWN, KC_RGHT, KC_VOLD,
                                           KC_LALT,                     KC_SPC ,                  MO(_FN)
     ),
+    [_FUNCBANK] = LAYOUT_all(
+        KC_F1, KC_F2,                                                                                                                                               _______, _______, _______, _______,
+        KC_F3, KC_F4,   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,  _______   , _______,  _______, _______, _______, _______,
+        KC_F5, KC_F6,    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,    _______,
+        KC_F7, KC_F8,     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,                      _______, _______, _______, _______,
+        KC_F9, KC_F10,   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,            _______  ,           _______, _______, _______, _______,
+                                          _______,                     _______,                 _______
+    ),
     [_FN] = LAYOUT_all(
         KC_F1  , KC_F2  ,                                                                                                                                               HPT_TOG, KC_NO ,  KC_NO  , KC_NO,
         KC_F3  , KC_F4  ,   KC_NO  , KC_F1  , KC_F2  , KC_F3  , KC_F4  , KC_F5  , KC_F6  , KC_F7  , KC_F8  , KC_F9  , KC_F10 , KC_F11 , KC_F12 ,  KC_NO     , KC_NO ,   KC_NO  , KC_NO  , KC_NO  , KC_NO,
         KC_F5  , KC_F6  ,   KC_NO  , KC_NO  , KC_NO  , KC_NO  , KC_NO  , KC_NO  , KC_NO  , KC_NO  , KC_NO  , KC_NO  , KC_NO  , KC_NO  , KC_NO  ,    KC_NO  ,
-        KC_F7  , KC_F8  ,   _______, KC_NO  , KC_NO  , KC_NO  , KC_NO  , KC_NO  ,TG(_HIST),KC_NO  , KC_NO  , KC_NO  , KC_NO  , KC_NO  , KC_NO  ,                        KC_CAPS, KC_SLCK, KC_PAUS, KC_NO,
+        KC_F7  , KC_F8  ,   _______, KC_NO  , KC_NO  , KC_NO,TG(_FUNCBANK), KC_NO,TG(_HIST),KC_NO , KC_NO  , KC_NO  , KC_NO  , KC_NO  , KC_NO  ,                        KC_CAPS, KC_SLCK, KC_PAUS, KC_NO,
         KC_F9  , KC_F10 ,   _______, _______, KC_NO  , KC_NO  , KC_NO  , KC_NO  , KC_NO  , KC_NO  , KC_NO  , KC_NO  , KC_NO  , KC_NO  ,            _______  ,           KC_NO  , KC_NO  , KC_NO  , KC_NO,
                                           _______,                     MO(_FNADV),                  _______
     ),
@@ -109,15 +121,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                           _______,                     _______,                  _______
     ),
     [_HIST] = LAYOUT_all(
-        _______, _______,                                                                                                                                               KC_DEL, _______, _______, _______,
+        _______, KC_LCTL,                                                                                                                                                           KC_DEL, _______, _______, _______,
         _______, _______,   XP(DW_PLUSMINUS, DW_DEGREE), _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,  _______   , _______,  _______, _______, _______, _______,
         _______, _______,    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, XP(DW_HALF, DW_QUARTER), XP(DW_RBRACKET, DW_LBRACKET),    _______,
-        _______, KC_PSCR,    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, XP(DW_SUP2, DW_SUP3),                                KC_UP  , KC_DOWN, _______, _______,
+        _______, KC_PSCR,    KC_CAPS, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, XP(DW_SUP2, DW_SUP3),                                KC_UP  , KC_DOWN, _______, _______,
         KC_END,  _______,    _______, XP(DW_SECTION, DW_PARAGRAPH), _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,            _______  ,           KC_LEFT, KC_RIGHT, _______, _______,
                                           MO(_HISTCODE),                     _______,                 _______
     ),
     [_HISTCODE] = LAYOUT_all(
-        _______, _______,                                                                                                                                               _______, _______, _______, _______,
+        KC_NO,   _______,                                                                                                                                               _______, _______, _______, _______,
         _______, _______,   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,  _______   , _______,  _______, _______, _______, _______,
         _______, _______,    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,    _______,
         _______, _______,     _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,                      LCTL(KC_HOME), LCTL(KC_END), _______, _______,
